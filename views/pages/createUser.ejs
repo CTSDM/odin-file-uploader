@@ -1,0 +1,55 @@
+<%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
+<% if (locals.messageError) { %> <% if (locals.messageError.validation) { %> <%
+locals.messageError.validation.forEach((err)=> { %>
+<div><%= err.msg %></div>
+<% })} if (locals.messageError.db) { %>
+<div><%= locals.messageError.db %></div>
+<% }}%>
+
+<div class="form-signup">
+    <form action="/sign-up" method="POST">
+        <div>
+            <label for="username">Username: </label>
+            <input
+                type="text"
+                name="username"
+                id="username"
+                required
+                minlength="<%= locals.env.userForm.nameMinLength %>"
+                minlength="<%= locals.env.userForm.nameMaxLength %>"
+            />
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input
+                type="password"
+                name="password"
+                id="password"
+                required
+                minlength="<%= locals.env.userForm.passwordMinLength %>"
+                minlength="<%= locals.env.userForm.passwordMaxLength %>"
+            />
+        </div>
+        <div>
+            <label for="passwordConfirmation">Confirm your password</label>
+            <input
+                type="password"
+                name="passwordConfirmation"
+                id="passwordConfirmation"
+                required
+                minlength="<%= locals.env.userForm.passwordMinLength %>"
+                minlength="<%= locals.env.userForm.passwordMaxLength %>"
+            />
+        </div>
+        <button id="button-submit-new-user" type="submit">Submit</button>
+    </form>
+</div>
+<script defer>
+    const buttonSubmit = document.querySelector("#button-submit-new-user");
+    const pw = document.querySelector("#password");
+    const pwConfirmation = document.querySelector("#passwordConfirmation");
+    buttonSubmit.addEventListener("click", (e) => {
+        if (pwConfirmation.value !== password.value) e.preventDefault();
+    });
+</script>
+<%- include('../partials/_footer.ejs') %>

@@ -1,0 +1,12 @@
+body {
+    background-color: lightcyan;
+}
+
+.messages {
+    font-size: 1.5rem;
+}
+
+.messages .container {
+    border: 1px solid red;
+    margin: 5px;
+}

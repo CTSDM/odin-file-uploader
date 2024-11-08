@@ -1,0 +1,7 @@
+<%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
+<body>
+    <% if(locals.user) { %>
+    <div>Hi <%= locals.user.username %></div>
+    <% } else { %> WELCOME STRANGER! Login to upload files! <% } %>
+</body>
+<%- include('../partials/_footer.ejs') %>
