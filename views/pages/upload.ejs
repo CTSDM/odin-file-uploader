@@ -1,8 +1,9 @@
 <%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
 <body>
-    <% if(locals.user) { %>
     <div>Hi <%= locals.user.username %></div>
-    <a href="/upload">Upload a file!</a>
-    <% } else { %> WELCOME STRANGER! Login to upload files! <% } %>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <button type="submit">Submit the file</button>
+    </form>
 </body>
 <%- include('../partials/_footer.ejs') %>

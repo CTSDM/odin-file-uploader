@@ -11,6 +11,7 @@ const env = {
         secretCodeMinLength: process.env.SECRET_CODE_MIN_LENGTH,
         secretCodeMaxLength: process.env.SECRET_CODE_MAX_LENGTH,
     },
+    uploadPath: process.env.UPLOAD_PATH,
 };
 
 module.exports = { env };
