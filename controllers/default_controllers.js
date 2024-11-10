@@ -1,7 +1,8 @@
 const db = require("../db/queries.js");
 
-async function getPrint(req, res) {
-    res.render("../views/pages/index.ejs", { user: req.user });
+async function getPrint(_, res) {
+    if (res.locals.user) res.redirect("/home");
+    res.render("../views/pages/index.ejs");
 }
 
 module.exports = getPrint;

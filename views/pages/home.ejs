@@ -1,0 +1,53 @@
+<%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
+
+<body>
+    <div>Hi <%= locals.user.username %></div>
+    <div>
+        <span><%= locals.currentDirectory.name %> directory.</span>
+    </div>
+    <% if (locals.currentDirectory.children) { %>
+    <div>Children directories</div>
+    <% locals.currentDirectory.children.forEach((child) => { %>
+    <div>
+        <a href="/directory/<%= child.id %>"><%= child.name %></a>
+    </div>
+    <% }) %> <% } %>
+    <div class="upload-file">
+        <form action="/home" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required />
+            <button type="submit">Submit the file</button>
+        </form>
+    </div>
+    <div class="create-folder">
+        Create a new folder under this /<%= locals.currentDirectory.name%>/
+        directory.
+
+        <div class="directory">
+            <form action="/directory/newDir" method="POST">
+                <div>
+                    <label for="directory">New directory name: </label>
+                    <input
+                        type="text"
+                        name="directory"
+                        id="directory"
+                        placeholder="dir name"
+                        required
+                        minlength="<%= locals.env.userForm.directoryMinLength %>"
+                        minlength="<%= locals.env.userForm.directoryMaxLength %>"
+                    />
+                </div>
+                <div>
+                    <input
+                        type="hidden"
+                        name="parentId"
+                        value="<%= locals.currentDirectory.id %>"
+                    />
+                </div>
+                <button id="button-submit-new-user" type="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+<%- include('../partials/_footer.ejs') %>

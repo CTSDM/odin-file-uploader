@@ -11,7 +11,8 @@ const app = express();
 const defaultRouter = require("./routes/defaultRouter.js");
 const signupRouter = require("./routes/signupRouter.js");
 const loginRouter = require("./routes/loginRouter.js");
-const uploadRouter = require("./routes/uploadRouter.js");
+const homeRouter = require("./routes/homeRouter.js");
+const directoryRouter = require("./routes/directoryRouter.js");
 
 const PORT = 5000;
 const assetsPath = path.join(__dirname, "public");
@@ -47,7 +48,8 @@ app.use((req, res, next) => {
 app.use("/", defaultRouter);
 app.use("/sign-up", signupRouter);
 app.use("/login", loginRouter);
-app.use("/upload", uploadRouter);
+app.use("/home", homeRouter);
+app.use("/directory", directoryRouter);
 app.get("/logout", (req, res, next) => {
     req.logout((err) => {
         if (err) return next(err);

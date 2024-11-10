@@ -7,35 +7,36 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Folder {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now())
-    title     String   @db.VarChar(255)
-    content   String
-    File      File[]
-    User      User?    @relation(fields: [userId], references: [id])
-    userId    Int?
+model Directory {
+    id       Int         @id @default(autoincrement())
+    name     String      @db.VarChar(255)
+    parentId Int?
+    parent   Directory?  @relation("DirectoryHierarchy", fields: [parentId], references: [id])
+    User     User?       @relation(fields: [userId], references: [id])
+    userId   Int?
+    children Directory[] @relation("DirectoryHierarchy")
+    files    File[]
 
-    @@map("folders")
+    @@map("directories")
 }
 
 model File {
-    id        Int      @id @default(autoincrement())
-    createdAt DateTime @default(now()) @db.Timestamptz(3)
-    User      User?    @relation(fields: [userId], references: [id])
-    Folder    Folder?  @relation(fields: [folderId], references: [id])
-    userId    Int?
-    folderId  Int?
+    id          Int       @id @default(autoincrement())
+    createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+    User        User?     @relation(fields: [userId], references: [id])
+    Directory   Directory @relation(fields: [directoryId], references: [id])
+    directoryId Int
+    userId      Int
 
     @@map("files")
 }
 
 model User {
-    id       Int      @id @default(autoincrement())
-    username String   @unique
-    password String
-    File     File[]
-    Folder   Folder[]
+    id        Int         @id @default(autoincrement())
+    username  String      @unique
+    password  String
+    files      File[]
+    directories Directory[]
 
     @@map("users")
 }

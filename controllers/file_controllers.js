@@ -20,12 +20,6 @@ const storage = multer.diskStorage({
 // Initialize multer with the custom storage
 const upload = multer({ storage: storage });
 
-function getHomepageUpload(_, res) {
-    // Check if the user is logged in
-    if (res.locals.user) res.render("../views/pages/upload.ejs");
-    else res.redirect("/");
-}
-
 const postUploadFile = [
     // Check if the user is logged in
     function (req, res, next) {
@@ -41,4 +35,4 @@ const postUploadFile = [
     },
 ];
 
-module.exports = { getHomepageUpload, postUploadFile };
+module.exports = { postUploadFile };
