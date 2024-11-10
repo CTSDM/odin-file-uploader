@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import db from "../db/queries.js";
+import { nanoid } from "nanoid";
 
 // Create a custom storage engine
 const storage = multer.diskStorage({
@@ -13,8 +14,8 @@ const storage = multer.diskStorage({
             cb(null, userDir);
         });
     },
-    filename: function (_, file, cb) {
-        cb(null, file.filename);
+    filename: function (_, __, cb) {
+        cb(null, nanoid());
     },
 });
 
