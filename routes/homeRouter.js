@@ -1,10 +1,10 @@
-const { Router } = require("express");
-const filesControllers = require("../controllers/file_controllers");
-const directoryControllers = require("../controllers/directory_controllers.js");
+import { Router } from "express";
+import filesControllers from "../controllers/file_controllers.js";
+import directoryControllers from "../controllers/directory_controllers.js";
 
-const router = new Router();
+const router = Router();
 
 router.get("/", directoryControllers.getHomepage);
-router.post("/", filesControllers.postUploadFile);
+router.post("/", filesControllers.uploadFile);
 
-module.exports = router;
+export default router;

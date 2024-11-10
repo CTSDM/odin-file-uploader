@@ -1,8 +1,8 @@
-const { env } = require("../config/config.js");
-const db = require("../db/queries.js");
-const bcrypt = require("bcryptjs");
-const passport = require("passport");
-const validation = require("../middleware/validation.js");
+import { env } from "../config/config.js";
+import db from "../db/queries.js";
+import bcrypt from "bcryptjs";
+import passport from "passport";
+import validation from "../middleware/validation.js";
 
 async function getCreateUser(_, res) {
     res.render("../views/pages/createUser.ejs", { env: env });
@@ -38,7 +38,4 @@ const postCreateUser = [
     },
 ];
 
-module.exports = {
-    getCreateUser,
-    postCreateUser,
-};
+export default { getCreateUser, postCreateUser };

@@ -1,4 +1,4 @@
-const passport = require("passport");
+import passport from "passport";
 
 function getLogin(_, res) {
     res.render("../views/pages/login.ejs");
@@ -12,4 +12,4 @@ const postLogin = [
     }),
 ];
 
-module.exports = { getLogin, postLogin };
+export default { getLogin, postLogin };

@@ -1,7 +1,7 @@
-const { Router } = require("express");
-const getPrint = require("../controllers/default_controllers");
+import { Router } from "express";
+import { getPrint } from "../controllers/default_controllers.js";
 
 const router = Router();
 router.get("/", getPrint);
 
-module.exports = router;
+export default router;

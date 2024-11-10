@@ -1,7 +1,8 @@
-const { env } = require("../config/config");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+import { env } from "../config/config.js";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+import db from "../db/queries.js";
 
 // Create a custom storage engine
 const storage = multer.diskStorage({
@@ -13,26 +14,46 @@ const storage = multer.diskStorage({
         });
     },
     filename: function (_, file, cb) {
-        cb(null, file.originalname);
+        cb(null, file.filename);
     },
 });
 
 // Initialize multer with the custom storage
 const upload = multer({ storage: storage });
 
-const postUploadFile = [
+const uploadFile = [
     // Check if the user is logged in
     function (req, res, next) {
         if (req.user) next();
-        res.redirect("/");
+        else res.redirect("/");
     },
     upload.single("file"),
-    function (req, res) {
-        if (req.file) res.redirect("/");
-        res.status(400).send(
-            "Something went wrong, and the file could not be uploaded",
+    writeToDB,
+    async function (req, res) {
+        // we need to know whether the directory is root or not for the redirect path
+        const directory = await db.getDirectoryByID(
+            +req.user.id,
+            +req.body.directoryId,
         );
+        if (directory.parentId)
+            res.redirect(`/directory/${+req.body.directoryId}`);
+        else res.redirect("/home");
     },
 ];
 
-module.exports = { postUploadFile };
+async function writeToDB(req, res, next) {
+    if (req.file) {
+        await db.addFile(
+            +req.user.id,
+            +req.body.directoryId,
+            req.file.filename,
+        );
+        next();
+    } else {
+        res.status(400).send(
+            "Something went wrong, and the file could not be uploaded",
+        );
+    }
+}
+
+export default { uploadFile };

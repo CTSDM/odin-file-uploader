@@ -5,7 +5,7 @@
     <div>
         <span><%= locals.currentDirectory.name %> directory.</span>
     </div>
-    <% if (locals.currentDirectory.children) { %>
+    <% if (locals.currentDirectory.children.length > 0) { %>
     <div>Children directories</div>
     <% locals.currentDirectory.children.forEach((child) => { %>
     <div>
@@ -16,6 +16,16 @@
         <form action="/home" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required />
             <button type="submit">Submit the file</button>
+            <input
+                type="hidden"
+                name="directoryId"
+                value="<%= locals.currentDirectory.id %>"
+            />
+            <input
+                type="hidden"
+                name="directoryName"
+                value="<%= locals.currentDirectory.name %>"
+            />
         </form>
     </div>
     <div class="create-folder">

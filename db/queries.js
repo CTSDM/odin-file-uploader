@@ -1,5 +1,5 @@
-const assert = require("assert");
-const { PrismaClient } = require("@prisma/client");
+import assert from "assert";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -48,10 +48,13 @@ async function getAllDirectories(userId) {
 
 async function getDirectoryByID(userId, dirId) {
     // we check also that the queried directory matches the user that is requesting it
-    const directory = await prisma.directory.findMany({
+    const directory = await prisma.directory.findUnique({
         where: {
             id: dirId,
             userId: userId,
+        },
+        include: {
+            children: true,
         },
     });
     return directory;
@@ -70,11 +73,24 @@ async function getRootDirectory(userId) {
     return directory;
 }
 
-module.exports = {
+async function addFile(userId, directoryId, fileName) {
+    assert.strictEqual(typeof userId === "number", true);
+    assert.strictEqual(typeof directoryId === "number", true);
+    const file = await prisma.file.create({
+        data: {
+            userId: userId,
+            directoryId: directoryId,
+            name: fileName,
+        },
+    });
+}
+
+export default {
     createUser,
     getUser,
     createNewDirectory,
     getAllDirectories,
     getDirectoryByID,
     getRootDirectory,
+    addFile,
 };

@@ -14,4 +14,4 @@ const env = {
     uploadPath: process.env.UPLOAD_PATH,
 };
 
-module.exports = { env };
+export { env };

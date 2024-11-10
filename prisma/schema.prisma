@@ -22,6 +22,7 @@ model Directory {
 
 model File {
     id          Int       @id @default(autoincrement())
+    name        String    @db.VarChar(255)
     createdAt   DateTime  @default(now()) @db.Timestamptz(3)
     User        User?     @relation(fields: [userId], references: [id])
     Directory   Directory @relation(fields: [directoryId], references: [id])
@@ -32,10 +33,10 @@ model File {
 }
 
 model User {
-    id        Int         @id @default(autoincrement())
-    username  String      @unique
-    password  String
-    files      File[]
+    id          Int         @id @default(autoincrement())
+    username    String      @unique
+    password    String
+    files       File[]
     directories Directory[]
 
     @@map("users")

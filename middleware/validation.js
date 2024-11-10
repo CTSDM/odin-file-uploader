@@ -1,4 +1,4 @@
-const { body, query, param, validationResult } = require("express-validator");
+import { body, query, param, validationResult } from "express-validator";
 
 const errorMessages = {
     newUser: {
@@ -19,4 +19,4 @@ const validation = {
     validationResult,
 };
 
-module.exports = validation;
+export default validation;
