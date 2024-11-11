@@ -1,16 +1,18 @@
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+    provider   = "postgresql"
+    url        = env("DATABASE_URL")
+    extensions = [pgcrypto]
 }
 
 model Directory {
-    id       Int         @id @default(autoincrement())
+    id       String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     name     String      @db.VarChar(255)
-    parentId Int?
+    parentId String?     @db.Uuid
     parent   Directory?  @relation("DirectoryHierarchy", fields: [parentId], references: [id])
     User     User?       @relation(fields: [userId], references: [id])
     userId   Int?
@@ -21,12 +23,12 @@ model Directory {
 }
 
 model File {
-    id          Int       @id @default(autoincrement())
+    id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     name        String    @db.VarChar(255)
     createdAt   DateTime  @default(now()) @db.Timestamptz(3)
     User        User?     @relation(fields: [userId], references: [id])
     Directory   Directory @relation(fields: [directoryId], references: [id])
-    directoryId Int
+    directoryId String    @db.Uuid
     userId      Int
 
     @@map("files")
