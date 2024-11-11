@@ -18,7 +18,7 @@ async function getHomepage(req, res) {
 }
 
 async function createDir(req, res) {
-    const parentId = req.body.parentId === "" ? null : +req.body.parentId;
+    const parentId = +req.body.parentId;
     const dirName = req.body.directory;
     const userId = req.user.id;
     await db.createNewDirectory(userId, dirName, parentId);
