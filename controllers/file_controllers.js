@@ -34,10 +34,10 @@ const uploadFile = [
         // we need to know whether the directory is root or not for the redirect path
         const directory = await db.getDirectoryByID(
             +req.user.id,
-            +req.body.directoryId,
+            req.body.directoryId,
         );
         if (directory.parentId)
-            res.redirect(`/directory/${+req.body.directoryId}`);
+            res.redirect(`/directory/${req.body.directoryId}`);
         else res.redirect("/home");
     },
 ];
@@ -46,8 +46,8 @@ async function writeToDB(req, res, next) {
     if (req.file) {
         await db.addFile(
             +req.user.id,
-            +req.body.directoryId,
-            req.file.filename,
+            req.body.directoryId,
+            req.file.originalname,
         );
         next();
     } else {

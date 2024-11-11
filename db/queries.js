@@ -75,7 +75,8 @@ async function getRootDirectory(userId) {
 
 async function addFile(userId, directoryId, fileName) {
     assert.strictEqual(typeof userId === "number", true);
-    assert.strictEqual(typeof directoryId === "number", true);
+    assert.strictEqual(typeof directoryId === "string", true);
+    assert.strictEqual(directoryId.length === 36, true);
     const file = await prisma.file.create({
         data: {
             userId: userId,

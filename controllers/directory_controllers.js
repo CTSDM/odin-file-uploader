@@ -18,7 +18,7 @@ async function getHomepage(req, res) {
 }
 
 async function createDir(req, res) {
-    const parentId = +req.body.parentId;
+    const parentId = req.body.parentId;
     const dirName = req.body.directory;
     const userId = req.user.id;
     await db.createNewDirectory(userId, dirName, parentId);
@@ -32,9 +32,9 @@ async function getDirectory(req, res) {
     // check if the user is logged in
     if (res.locals.user) {
         // check if the user has access to the requested directory
-        const directoryId = +req.params.id;
+        const directoryId = req.params.id;
         const userId = +req.user.id;
-        const directory = await db.getDirectoryByID(userId, +directoryId);
+        const directory = await db.getDirectoryByID(userId, directoryId);
         if (directory === null) {
             console.log("user cannot access the requested folder");
             res.redirect("/home");
