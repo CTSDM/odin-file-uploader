@@ -53,6 +53,7 @@ function getDirectoryInfo(directory) {
     const childrenInfo = [];
     directoryInfo.name = directory.name;
     directoryInfo.id = directory.id;
+    directoryInfo.parentId = directory.parentId;
     directoryInfo.children = childrenInfo;
     if (directory.children.length > 0) {
         directory.children.forEach((child) => {

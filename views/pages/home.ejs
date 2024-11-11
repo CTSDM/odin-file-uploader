@@ -11,7 +11,17 @@
     <div>
         <a href="/directory/<%= child.id %>"><%= child.name %></a>
     </div>
-    <% }) %> <% } %>
+    <% }) %> <% } %> <% if (locals.currentDirectory.parentId) { %>
+    <div>
+        <a href="/directory/<%= locals.currentDirectory.parentId %>"
+            >Go back to parent directory
+        </a>
+    </div>
+    <% } else { %>
+    <div>
+        You are in the top level directory.
+    </div>
+    <% } %>
     <div class="upload-file">
         <form action="/home" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required />
