@@ -23,8 +23,11 @@
     <% } %>
     <% if (locals.currentDirectory.files.length > 0) { %>
     <div class="files-wrapper">
+        Click to download a file:
         <% locals.currentDirectory.files.forEach((file) => { %>
-        <div class="file">filename: <%= file.name %></div>
+        <div class="file">
+            <a href="/file/download/<%= file.id %>"><%= file.name %></a>
+        </div>
         <% }) %> <% } %>
     <div class="upload-file">
         <form action="/home" method="post" enctype="multipart/form-data">

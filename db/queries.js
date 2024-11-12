@@ -77,15 +77,18 @@ async function getRootDirectory(userId) {
     return directory[0];
 }
 
-async function addFile(userId, directoryId, fileName) {
+async function addFile(userId, directoryId, originalFilename, savedFilename) {
     assert.strictEqual(typeof userId === "number", true);
     assert.strictEqual(typeof directoryId === "string", true);
     assert.strictEqual(directoryId.length === 36, true);
+    assert.strictEqual(typeof originalFilename === "string", true);
+    assert.strictEqual(typeof savedFilename === "string", true);
     const file = await prisma.file.create({
         data: {
             userId: userId,
             directoryId: directoryId,
-            name: fileName,
+            name: originalFilename,
+            nameStorage: savedFilename,
         },
     });
 }
@@ -107,6 +110,23 @@ async function getFilesByDirectoryId(directoryId, userId) {
     return files;
 }
 
+async function getFile(fileId, userId) {
+    assert.strictEqual(typeof userId === "number", true);
+    assert.strictEqual(typeof fileId === "string", true);
+    assert.strictEqual(fileId.length === 36, true);
+    const file = await prisma.file.findUnique({
+        where: {
+            id: fileId,
+            userId: userId,
+        },
+        select: {
+            name: true,
+            nameStorage: true,
+        },
+    });
+    return file;
+}
+
 export default {
     createUser,
     getUser,
@@ -116,4 +136,5 @@ export default {
     getRootDirectory,
     addFile,
     getFilesByDirectoryId,
+    getFile,
 };
