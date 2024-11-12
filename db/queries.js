@@ -64,6 +64,7 @@ async function getRootDirectory(userId) {
     // We cannot use findUnique as we are not providing an unique parameter to find the root directory
     // Instead, we are looking for the directory with parentId === null
     // We will get an array with only one item
+    assert.strictEqual(typeof userId === "number", true);
     const directory = await prisma.directory.findMany({
         where: {
             userId: userId,
@@ -89,6 +90,23 @@ async function addFile(userId, directoryId, fileName) {
     });
 }
 
+async function getFilesByDirectoryId(directoryId, userId) {
+    assert.strictEqual(typeof userId === "number", true);
+    assert.strictEqual(typeof directoryId === "string", true);
+    assert.strictEqual(directoryId.length === 36, true);
+    const files = await prisma.file.findMany({
+        where: {
+            directoryId: directoryId,
+            userId: userId,
+        },
+        select: {
+            name: true,
+            id: true,
+        },
+    });
+    return files;
+}
+
 export default {
     createUser,
     getUser,
@@ -97,4 +115,5 @@ export default {
     getDirectoryByID,
     getRootDirectory,
     addFile,
+    getFilesByDirectoryId,
 };

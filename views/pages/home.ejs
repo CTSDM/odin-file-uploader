@@ -17,11 +17,15 @@
             >Go back to parent directory
         </a>
     </div>
-    <% } else { %>
-    <div>
-        You are in the top level directory.
     </div>
+    <% } else { %>
+    <div>You are in the top level directory.</div>
     <% } %>
+    <% if (locals.currentDirectory.files.length > 0) { %>
+    <div class="files-wrapper">
+        <% locals.currentDirectory.files.forEach((file) => { %>
+        <div class="file">filename: <%= file.name %></div>
+        <% }) %> <% } %>
     <div class="upload-file">
         <form action="/home" method="post" enctype="multipart/form-data">
             <input type="file" name="file" required />

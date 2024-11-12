@@ -6,8 +6,12 @@ async function getHomepage(req, res) {
     if (res.locals.user) {
         if (req.originalUrl === "/directory") res.redirect("/home");
         else {
-            const rootDir = await db.getRootDirectory(req.user.id);
+            const userId = +req.user.id;
+            const rootDir = await db.getRootDirectory(userId);
             const directoryInfo = getDirectoryInfo(rootDir);
+            const files = await db.getFilesByDirectoryId(rootDir.id, userId);
+            directoryInfo.files = files;
+            console.log(files);
             res.render("../views/pages/home.ejs", {
                 env: env,
                 currentDirectory: directoryInfo,
@@ -39,6 +43,8 @@ async function getDirectory(req, res) {
             res.redirect("/home");
         } else {
             const directoryInfo = getDirectoryInfo(directory);
+            const files = await db.getFilesByDirectoryId(directory.id, userId);
+            directoryInfo.files = files;
             res.render("../views/pages/home.ejs", {
                 env: env,
                 currentDirectory: directoryInfo,
