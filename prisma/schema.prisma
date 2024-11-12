@@ -25,10 +25,12 @@ model Directory {
 model File {
     id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     name        String    @db.VarChar(255)
+    nameStorage String    @db.VarChar(255)
     createdAt   DateTime  @default(now()) @db.Timestamptz(3)
     User        User?     @relation(fields: [userId], references: [id])
     Directory   Directory @relation(fields: [directoryId], references: [id])
     directoryId String    @db.Uuid
+    downloads   Int       @default(0)
     userId      Int
 
     @@map("files")
