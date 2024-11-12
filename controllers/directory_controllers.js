@@ -6,8 +6,7 @@ async function getHomepage(req, res) {
     if (res.locals.user) {
         if (req.originalUrl === "/directory") res.redirect("/home");
         else {
-            const directories = await db.getAllDirectories(req.user.id);
-            const rootDir = directories[0];
+            const rootDir = await db.getRootDirectory(req.user.id);
             const directoryInfo = getDirectoryInfo(rootDir);
             res.render("../views/pages/home.ejs", {
                 env: env,
