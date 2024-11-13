@@ -127,6 +127,21 @@ async function getFile(fileId, userId) {
     return file;
 }
 
+async function updateFileDownloads(fileId) {
+    assert.strictEqual(typeof fileId === "string", true);
+    assert.strictEqual(fileId.length === 36, true);
+    await prisma.file.update({
+        where: {
+            id: fileId,
+        },
+        data: {
+            downloads: {
+                increment: 1,
+            },
+        },
+    });
+}
+
 export default {
     createUser,
     getUser,
@@ -137,4 +152,5 @@ export default {
     addFile,
     getFilesByDirectoryId,
     getFile,
+    updateFileDownloads,
 };

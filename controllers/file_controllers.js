@@ -74,6 +74,7 @@ const downloadFile = [
                 `${env.uploadPath}/${userId}/${fileDB.nameStorage}`,
                 fileDB.name,
             );
+            db.updateFileDownloads(fileId);
         } else {
             console.error(
                 "There was an error trying to retrieve the file the user requested",
