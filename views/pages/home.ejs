@@ -26,7 +26,12 @@
         Click to download a file:
         <% locals.currentDirectory.files.forEach((file) => { %>
         <div class="file">
-            <a href="/file/download/<%= file.id %>"><%= file.name %></a>
+        <div class="file-link-download">
+            <a class="file-download-link" href="/file/download/<%= file.id %>"><%= file.name %></a>
+        </div>
+        <div class="number-downloads">
+            Number of downloads: <span class="counter-downloads"><%= file.downloads %></span>
+        </div>
         </div>
         <% }) %> <% } %>
     <div class="upload-file">
@@ -76,5 +81,14 @@
             </form>
         </div>
     </div>
+    <script>
+        const downloadButtons = document.querySelectorAll(".file-download-link");
+        const downloadHitsArr = document.querySelectorAll(".counter-downloads");
+        downloadButtons.forEach((button, index)  => {
+            button.addEventListener("click", () => {
+                downloadHitsArr[index].innerText = +downloadHitsArr[index].innerText + 1;
+            })
+        })
+    </script>
 </body>
 <%- include('../partials/_footer.ejs') %>

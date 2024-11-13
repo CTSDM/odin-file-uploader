@@ -105,6 +105,7 @@ async function getFilesByDirectoryId(directoryId, userId) {
         select: {
             name: true,
             id: true,
+            downloads: true,
         },
     });
     return files;
