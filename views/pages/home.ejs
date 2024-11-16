@@ -13,8 +13,15 @@
     <% if (locals.currentDirectory.children.length > 0) { %>
     <div>Children directories</div>
     <% locals.currentDirectory.children.forEach((child) => { %>
-    <div>
+    <div class="directory">
         <a href="/directory/<%= child.id %>"><%= child.name %></a>
+        <div class="modifications">
+            <span> <a href="/directory/delete/<%= child.id %>/">Delete</a>
+            </span>
+            <span>
+                Rename
+            </span>
+        </div>
     </div>
     <% }) %> <% } %> <% if (locals.currentDirectory.parentId) { %>
     <div>
@@ -33,9 +40,13 @@
         <div class="file">
         <div class="file-link-download">
                 <a class="file-download-link" href="/file/download/<%= file.id %>"><%= file.name + '.' + file.extension %></a>
-        </div>
+            </div>
+        <div class="modification">
         <div class="number-downloads">
-            Number of downloads: <span class="counter-downloads"><%= file.downloads %></span>
+            <span>Number of downloads: <span class="counter-downloads"><%= file.downloads %></span></span>
+            <span> <a href="/file/delete/<%= file.id %>/">Delete</a></span>
+            <span>Rename</span>
+        </div>
         </div>
         </div>
         <% }) %> <% } %>
@@ -59,7 +70,7 @@
         Create a new folder under this /<%= locals.currentDirectory.name%>/
         directory.
 
-        <div class="directory">
+        <div class="create-directory">
             <form action="/directory/newDir" method="POST">
                 <div>
                     <label for="directory">New directory name: </label>

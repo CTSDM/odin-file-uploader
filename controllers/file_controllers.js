@@ -3,6 +3,7 @@ import multer from "multer";
 import db from "../db/queries.js";
 import https from "https";
 import cloudinary from "../config/database.js";
+import deleteFileFromCloud from "../helpers/helpers.js";
 
 // Initialize multer with RAM as storage
 const storage = multer.memoryStorage();
@@ -35,7 +36,6 @@ const uploadFile = [
     upload.single("file"),
     // cloudinary upload
     async (req, res, next) => {
-        console.log(req.file);
         if (req.file) {
             try {
                 const b64 = Buffer.from(req.file.buffer).toString("base64");
@@ -43,11 +43,14 @@ const uploadFile = [
                 if (req.file.size > fileAllowedInfo[req.file.mimetype])
                     renderUpload(req, res, 1);
                 else {
+                    const userId = req.user.id;
+                    const dirId = req.body.directoryId;
                     const result = await cloudinary.uploader.upload(dataURI, {
-                        folder: env.uploadPath + "/" + req.user.id,
+                        folder: env.uploadPath + "/" + userId + "/" + dirId,
                         resource_type: "auto",
                     });
                     res.urlUploaded = result.secure_url;
+                    res.publicID = result.public_id;
                     next();
                 }
             } catch (err) {
@@ -55,7 +58,9 @@ const uploadFile = [
                     error: "Error uploading image to Cloudinary",
                 });
             }
-        } else renderUpload(req, res, 2);
+        } else {
+            renderUpload(req, res, 2);
+        }
     },
     writeToDB,
     async function (req, res) {
@@ -79,6 +84,7 @@ async function writeToDB(req, res, next) {
             fileInfo.name,
             fileInfo.extension,
             res.urlUploaded,
+            res.publicID,
         );
         next();
     } else {
@@ -136,4 +142,19 @@ function getFileNameExtension(originalName) {
     };
 }
 
-export default { uploadFile, downloadFile };
+async function deleteFile(req, res) {
+    if (res.locals.user) {
+        const fileId = req.params.id;
+        const userId = +req.user.id;
+        const file = await db.getFile(fileId, userId);
+        if (await deleteFileFromCloud(file.publicId, file.extension))
+            await db.deleteFile(fileId, userId);
+        else console.log("The file could not be deleted from the cloud");
+
+        res.redirect(req.get("Referrer"));
+    } else {
+        res.redirect("/");
+    }
+}
+
+export default { uploadFile, downloadFile, deleteFile };

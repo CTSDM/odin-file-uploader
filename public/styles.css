@@ -11,7 +11,12 @@ body {
     margin: 5px;
 }
 
-.file {
+.file,
+.directory {
     border: 1px solid red;
     margin: 5px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%,
+
 }

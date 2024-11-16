@@ -81,13 +81,21 @@ async function getRootDirectory(userId) {
     return directory[0];
 }
 
-async function addFile(userId, directoryId, name, extension, urlPath) {
+async function addFile(
+    userId,
+    directoryId,
+    name,
+    extension,
+    urlPath,
+    publicID,
+) {
     assert.strictEqual(typeof userId === "number", true);
     assert.strictEqual(typeof directoryId === "string", true);
     assert.strictEqual(directoryId.length === 36, true);
     assert.strictEqual(typeof name === "string", true);
     assert.strictEqual(typeof urlPath === "string", true);
     assert.strictEqual(typeof extension === "string", true);
+    assert.strictEqual(typeof publicID === "string", true);
     const file = await prisma.file.create({
         data: {
             userId: userId,
@@ -95,8 +103,10 @@ async function addFile(userId, directoryId, name, extension, urlPath) {
             name: name,
             extension: extension,
             urlStorage: urlPath,
+            publicId: publicID,
         },
     });
+    return file;
 }
 
 async function getFilesByDirectoryId(directoryId, userId) {
@@ -118,6 +128,7 @@ async function getFilesByDirectoryId(directoryId, userId) {
             extension: true,
             id: true,
             downloads: true,
+            publicId: true,
         },
     });
     return files;
@@ -134,6 +145,7 @@ async function getFile(fileId, userId) {
         },
         select: {
             name: true,
+            publicId: true,
             extension: true,
             urlStorage: true,
         },
@@ -156,6 +168,26 @@ async function updateFileDownloads(fileId) {
     });
 }
 
+async function deleteFile(fileId, userId) {
+    const file = await prisma.file.delete({
+        where: {
+            id: fileId,
+            userId: userId,
+        },
+    });
+    return file;
+}
+
+async function deleteDirectory(userId, directoryId) {
+    const directory = await prisma.directory.delete({
+        where: {
+            id: directoryId,
+            userId: userId,
+        },
+    });
+    return directory;
+}
+
 export default {
     createUser,
     getUser,
@@ -167,4 +199,6 @@ export default {
     getFilesByDirectoryId,
     getFile,
     updateFileDownloads,
+    deleteFile,
+    deleteDirectory,
 };

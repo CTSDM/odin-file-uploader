@@ -27,6 +27,7 @@ const fileAllowedInfo = {
     "image/bmp": 1 * 1024 * 1024,
     "image/gif": 1 * 1024 * 1024,
     "image/jpg": 5 * 1024 * 1024,
+    "image/jpeg": 5 * 1024 * 1024,
     "image/png": 5 * 1024 * 1024,
     "text/css": 0.1 * 1024 * 1024,
     "application/msword": 5 * 1024 * 1024,
@@ -40,10 +41,15 @@ const fileAllowedInfo = {
     "video/mpeg": 5 * 1024 * 1024,
 };
 
+const fileTypes = {
+    video: ["mp4", "mpeg"],
+    image: ["bmp", "gif", "jpg", "jpeg", "png"],
+};
+
 const fileStatusUpload = [
     "The file can be uploaded.",
     "File too large",
     "File type is not valid",
 ];
 
-export { env, fileAllowedInfo, fileStatusUpload };
+export { env, fileAllowedInfo, fileStatusUpload, fileTypes };
