@@ -25,7 +25,7 @@ model Directory {
 model File {
     id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
     name        String    @db.VarChar(255)
-    nameStorage String    @db.VarChar(255)
+    urlStorage  String
     createdAt   DateTime  @default(now()) @db.Timestamptz(3)
     User        User?     @relation(fields: [userId], references: [id])
     Directory   Directory @relation(fields: [directoryId], references: [id])
