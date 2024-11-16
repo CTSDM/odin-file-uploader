@@ -1,26 +1,30 @@
-import { env } from "../config/config.js";
+import { env, fileInfo, fileStatusUpload } from "../config/config.js";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
 import db from "../db/queries.js";
-import { nanoid } from "nanoid";
+import https from "https";
+import cloudinary from "../config/database.js";
 
-// Create a custom storage engine
-const storage = multer.diskStorage({
-    destination: function (req, _, cb) {
-        const userDir = path.join(env.uploadPath, req.user.id.toString());
-        fs.mkdir(userDir, { recursive: true }, (err) => {
-            if (err) return cb(err);
-            cb(null, userDir);
-        });
+// Initialize multer with RAM as storage
+const storage = multer.memoryStorage();
+// At this point with multer we don't know the size of the file
+// but we know its mimetype, so if the type file is not allowed we refuse the upload
+// thus potentially saving some RAM usage and bandwidth
+const fileFilter = (_, file, cb) => {
+    if (fileInfo[file.mimetype]) {
+        cb(null, true);
+    } else {
+        // cb(null, false) makes that the req.file after upload.single is undefined
+        cb(null, false);
+    }
+};
+// upload
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1 * 1024 * 1024 * 10, // 10 MB maximum size for any given file
     },
-    filename: function (_, __, cb) {
-        cb(null, nanoid());
-    },
+    fileFilter: fileFilter,
 });
-
-// Initialize multer with the custom storage
-const upload = multer({ storage: storage });
 
 const uploadFile = [
     // Check if the user is logged in
@@ -29,6 +33,29 @@ const uploadFile = [
         else res.redirect("/");
     },
     upload.single("file"),
+    // cloudinary upload
+    async (req, res, next) => {
+        if (req.file) {
+            try {
+                const b64 = Buffer.from(req.file.buffer).toString("base64");
+                let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+                if (req.file.size > fileInfo[req.file.mimetype])
+                    renderUpload(req, res, 1);
+                else {
+                    const result = await cloudinary.uploader.upload(dataURI, {
+                        folder: env.uploadPath + "/" + req.user.id,
+                        resource_type: "auto",
+                    });
+                    res.urlUploaded = result.secure_url;
+                    next();
+                }
+            } catch (err) {
+                res.status(500).json({
+                    error: "Error uploading image to Cloudinary",
+                });
+            }
+        } else renderUpload(req, res, 2);
+    },
     writeToDB,
     async function (req, res) {
         // we need to know whether the directory is root or not for the redirect path
@@ -48,7 +75,7 @@ async function writeToDB(req, res, next) {
             +req.user.id,
             req.body.directoryId,
             req.file.originalname,
-            req.file.filename,
+            res.urlUploaded,
         );
         next();
     } else {
@@ -70,10 +97,14 @@ const downloadFile = [
         const fileId = req.params.id;
         const fileDB = await db.getFile(fileId, userId);
         if (fileDB) {
-            res.download(
-                `${env.uploadPath}/${userId}/${fileDB.nameStorage}`,
-                fileDB.name,
-            );
+            https.get(fileDB.urlStorage, function (file) {
+                res.set(
+                    "Content-disposition",
+                    "attachment; filename=" + encodeURI(fileDB.name),
+                );
+                res.set("Content-Type", file.headers["content-type"]);
+                file.pipe(res);
+            });
             db.updateFileDownloads(fileId);
         } else {
             console.error(
@@ -83,5 +114,14 @@ const downloadFile = [
         }
     },
 ];
+
+function renderUpload(req, res, fileCode) {
+    const msg = fileCode === 1 ? fileStatusUpload[1] : fileStatusUpload[2];
+    res.render("../views/pages/home.ejs", {
+        currentDirectory: req.session.currentDirectory,
+        fileMsgUpload: msg,
+        env: env,
+    });
+}
 
 export default { uploadFile, downloadFile };

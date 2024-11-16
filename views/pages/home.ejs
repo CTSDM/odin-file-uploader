@@ -5,6 +5,11 @@
     <div>
         <span><%= locals.currentDirectory.name %> directory.</span>
     </div>
+    <% if (locals.fileMsgUpload) { %>
+    <div>
+        Error uploading the file: <%= locals.fileMsgUpload %>
+    </div>
+    <% } %>
     <% if (locals.currentDirectory.children.length > 0) { %>
     <div>Children directories</div>
     <% locals.currentDirectory.children.forEach((child) => { %>

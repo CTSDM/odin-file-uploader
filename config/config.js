@@ -12,6 +12,38 @@ const env = {
         directoryMaxLength: process.env.DIRECTORY_MAX_LENGTH,
     },
     uploadPath: process.env.UPLOAD_PATH,
+    db: {
+        cloud_name: process.env.CLOUD_NAME,
+        api_key: process.env.API_KEY_CLOUDINARY,
+        api_secret: process.env.API_SECRET_CLOUDINARY,
+    },
 };
 
-export { env };
+const fileInfo = {
+    // mimetype: max. allowed size in bytes
+    "audio/aac": 5 * 1024 * 1024,
+    "audio/mpeg": 5 * 1024 * 1024,
+    "audio/ogg": 5 * 1024 * 1024,
+    "image/bmp": 1 * 1024 * 1024,
+    "image/gif": 1 * 1024 * 1024,
+    "image/jpg": 5 * 1024 * 1024,
+    "image/png": 5 * 1024 * 1024,
+    "text/css": 0.1 * 1024 * 1024,
+    "application/msword": 5 * 1024 * 1024,
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        5 * 1024 * 1024,
+    "application/vnd.oasis.opendocument.text": 5 * 1024 * 1024,
+    "application/json": 0.1 * 1024 * 1024,
+    "application/pdf": 3 * 1024 * 1024,
+    "text/plain": 1 * 1024 * 1024,
+    "video/mp4": 5 * 1024 * 1024,
+    "video/mpeg": 5 * 1024 * 1024,
+};
+
+const fileStatusUpload = [
+    "The file can be uploaded.",
+    "File too large",
+    "File type is not valid",
+];
+
+export { env, fileInfo, fileStatusUpload };

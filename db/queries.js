@@ -77,18 +77,18 @@ async function getRootDirectory(userId) {
     return directory[0];
 }
 
-async function addFile(userId, directoryId, originalFilename, savedFilename) {
+async function addFile(userId, directoryId, originalFilename, urlPath) {
     assert.strictEqual(typeof userId === "number", true);
     assert.strictEqual(typeof directoryId === "string", true);
     assert.strictEqual(directoryId.length === 36, true);
     assert.strictEqual(typeof originalFilename === "string", true);
-    assert.strictEqual(typeof savedFilename === "string", true);
+    assert.strictEqual(typeof urlPath === "string", true);
     const file = await prisma.file.create({
         data: {
             userId: userId,
             directoryId: directoryId,
             name: originalFilename,
-            nameStorage: savedFilename,
+            urlStorage: urlPath,
         },
     });
 }
@@ -122,7 +122,7 @@ async function getFile(fileId, userId) {
         },
         select: {
             name: true,
-            nameStorage: true,
+            urlStorage: true,
         },
     });
     return file;

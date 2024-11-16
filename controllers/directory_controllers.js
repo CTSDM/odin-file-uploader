@@ -8,7 +8,7 @@ async function getHomepage(req, res) {
         else {
             const userId = +req.user.id;
             const rootDir = await db.getRootDirectory(userId);
-            await renderDirectoryPage(rootDir, userId, res);
+            await renderDirectoryPage(rootDir, userId, req, res);
         }
     } else res.redirect("/");
 }
@@ -35,18 +35,19 @@ async function getDirectory(req, res) {
             console.log("user cannot access the requested folder");
             res.redirect("/home");
         } else {
-            await renderDirectoryPage(directory, userId, res);
+            await renderDirectoryPage(directory, userId, req, res);
         }
     } else res.redirect("/");
 }
 
-async function renderDirectoryPage(directory, userId, res) {
+async function renderDirectoryPage(directory, userId, req, res) {
     const directoryInfo = getDirectoryInfo(directory);
     const files = await db.getFilesByDirectoryId(directory.id, userId);
     directoryInfo.files = files;
+    res.locals.currentDirectory = directoryInfo;
+    req.session.currentDirectory = directoryInfo;
     res.render("../views/pages/home.ejs", {
         env: env,
-        currentDirectory: directoryInfo,
     });
 }
 
