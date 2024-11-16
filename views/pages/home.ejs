@@ -32,7 +32,7 @@
         <% locals.currentDirectory.files.forEach((file) => { %>
         <div class="file">
         <div class="file-link-download">
-            <a class="file-download-link" href="/file/download/<%= file.id %>"><%= file.name %></a>
+                <a class="file-download-link" href="/file/download/<%= file.id %>"><%= file.name + '.' + file.extension %></a>
         </div>
         <div class="number-downloads">
             Number of downloads: <span class="counter-downloads"><%= file.downloads %></span>

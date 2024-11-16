@@ -19,7 +19,7 @@ const env = {
     },
 };
 
-const fileInfo = {
+const fileAllowedInfo = {
     // mimetype: max. allowed size in bytes
     "audio/aac": 5 * 1024 * 1024,
     "audio/mpeg": 5 * 1024 * 1024,
@@ -46,4 +46,4 @@ const fileStatusUpload = [
     "File type is not valid",
 ];
 
-export { env, fileInfo, fileStatusUpload };
+export { env, fileAllowedInfo, fileStatusUpload };

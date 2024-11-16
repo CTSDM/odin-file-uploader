@@ -1,4 +1,4 @@
-import { env, fileInfo, fileStatusUpload } from "../config/config.js";
+import { env, fileAllowedInfo, fileStatusUpload } from "../config/config.js";
 import multer from "multer";
 import db from "../db/queries.js";
 import https from "https";
@@ -10,7 +10,7 @@ const storage = multer.memoryStorage();
 // but we know its mimetype, so if the type file is not allowed we refuse the upload
 // thus potentially saving some RAM usage and bandwidth
 const fileFilter = (_, file, cb) => {
-    if (fileInfo[file.mimetype]) {
+    if (fileAllowedInfo[file.mimetype]) {
         cb(null, true);
     } else {
         // cb(null, false) makes that the req.file after upload.single is undefined
@@ -35,11 +35,12 @@ const uploadFile = [
     upload.single("file"),
     // cloudinary upload
     async (req, res, next) => {
+        console.log(req.file);
         if (req.file) {
             try {
                 const b64 = Buffer.from(req.file.buffer).toString("base64");
                 let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-                if (req.file.size > fileInfo[req.file.mimetype])
+                if (req.file.size > fileAllowedInfo[req.file.mimetype])
                     renderUpload(req, res, 1);
                 else {
                     const result = await cloudinary.uploader.upload(dataURI, {
@@ -70,11 +71,13 @@ const uploadFile = [
 ];
 
 async function writeToDB(req, res, next) {
+    const fileInfo = getFileNameExtension(req.file.originalname);
     if (req.file) {
         await db.addFile(
             +req.user.id,
             req.body.directoryId,
-            req.file.originalname,
+            fileInfo.name,
+            fileInfo.extension,
             res.urlUploaded,
         );
         next();
@@ -100,7 +103,8 @@ const downloadFile = [
             https.get(fileDB.urlStorage, function (file) {
                 res.set(
                     "Content-disposition",
-                    "attachment; filename=" + encodeURI(fileDB.name),
+                    "attachment; filename=" +
+                        encodeURI(fileDB.name + "." + fileDB.extension),
                 );
                 res.set("Content-Type", file.headers["content-type"]);
                 file.pipe(res);
@@ -122,6 +126,14 @@ function renderUpload(req, res, fileCode) {
         fileMsgUpload: msg,
         env: env,
     });
+}
+
+function getFileNameExtension(originalName) {
+    const dotIndex = originalName.lastIndexOf(".");
+    return {
+        name: originalName.slice(0, dotIndex),
+        extension: originalName.slice(dotIndex + 1),
+    };
 }
 
 export default { uploadFile, downloadFile };

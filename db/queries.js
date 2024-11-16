@@ -54,7 +54,11 @@ async function getDirectoryByID(userId, dirId) {
             userId: userId,
         },
         include: {
-            children: true,
+            children: {
+                orderBy: {
+                    name: "asc",
+                },
+            },
         },
     });
     return directory;
@@ -77,17 +81,19 @@ async function getRootDirectory(userId) {
     return directory[0];
 }
 
-async function addFile(userId, directoryId, originalFilename, urlPath) {
+async function addFile(userId, directoryId, name, extension, urlPath) {
     assert.strictEqual(typeof userId === "number", true);
     assert.strictEqual(typeof directoryId === "string", true);
     assert.strictEqual(directoryId.length === 36, true);
-    assert.strictEqual(typeof originalFilename === "string", true);
+    assert.strictEqual(typeof name === "string", true);
     assert.strictEqual(typeof urlPath === "string", true);
+    assert.strictEqual(typeof extension === "string", true);
     const file = await prisma.file.create({
         data: {
             userId: userId,
             directoryId: directoryId,
-            name: originalFilename,
+            name: name,
+            extension: extension,
             urlStorage: urlPath,
         },
     });
@@ -98,12 +104,18 @@ async function getFilesByDirectoryId(directoryId, userId) {
     assert.strictEqual(typeof directoryId === "string", true);
     assert.strictEqual(directoryId.length === 36, true);
     const files = await prisma.file.findMany({
+        orderBy: [
+            {
+                name: "asc",
+            },
+        ],
         where: {
             directoryId: directoryId,
             userId: userId,
         },
         select: {
             name: true,
+            extension: true,
             id: true,
             downloads: true,
         },
@@ -122,6 +134,7 @@ async function getFile(fileId, userId) {
         },
         select: {
             name: true,
+            extension: true,
             urlStorage: true,
         },
     });
