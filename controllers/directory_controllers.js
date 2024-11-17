@@ -1,5 +1,6 @@
 import { env } from "../config/config.js";
 import db from "../db/queries.js";
+import { deleteDirFromCloud } from "../helpers/helpers.js";
 
 async function getHomepage(req, res) {
     // Check if the user is logged in
@@ -51,6 +52,48 @@ async function renderDirectoryPage(directory, userId, req, res) {
     });
 }
 
+// deleting a directory implies deleting all the files and directories inside the directory
+// so we retrieve all the directories and its associates files
+// then we iterate and delete everything
+async function deleteDirectory(req, res) {
+    if (res.locals.user) {
+        const directoryId = req.params.id;
+        const userId = +req.user.id;
+
+        const directory = await db.getDirectoryByID(userId, directoryId);
+        const { dirId, fileInfo } = await getDirsFilesIds(directory, userId);
+
+        for (let index = 0; index < dirId.length; ++index) {
+            const publicId = fileInfo[index][0];
+            const extension = fileInfo[index][1];
+            await deleteDirFromCloud(dirId[index], publicId, extension, userId);
+            await db.deleteFilesFromDirectory(userId, dirId[index]);
+            await db.deleteDirectory(userId, dirId[index]);
+        }
+        res.redirect(req.get("Referrer"));
+    } else res.redirect("/");
+}
+
+async function getDirsFilesIds(dir, userId, dirsList = [], fileList = []) {
+    dirsList.push(dir.id);
+    const files = await db.getFilesByDirectoryId(dir.id, userId);
+    // from the files we need its publicId and extension
+    const fileInfoArr = [[], []];
+    files.forEach((file) => {
+        fileInfoArr[0].push(file.publicId);
+        fileInfoArr[1].push(file.extension);
+    });
+    fileList[fileList.length] = fileInfoArr;
+    if (dir.children) {
+        for (const child of dir.children) {
+            const childComplete = await db.getDirectoryByID(userId, child.id);
+            await getDirsFilesIds(childComplete, userId, dirsList, fileList);
+        }
+    }
+    // the list is returned in the opposite direction so we delete from bottom to top
+    return { dirId: dirsList.reverse(), fileInfo: fileList.reverse() };
+}
+
 function getDirectoryInfo(directory) {
     const directoryInfo = {};
     const childrenInfo = [];
@@ -66,4 +109,4 @@ function getDirectoryInfo(directory) {
     return directoryInfo;
 }
 
-export default { getHomepage, createDir, getDirectory };
+export default { getHomepage, createDir, getDirectory, deleteDirectory };

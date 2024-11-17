@@ -3,7 +3,7 @@ import multer from "multer";
 import db from "../db/queries.js";
 import https from "https";
 import cloudinary from "../config/database.js";
-import deleteFileFromCloud from "../helpers/helpers.js";
+import { deleteFileFromCloud } from "../helpers/helpers.js";
 
 // Initialize multer with RAM as storage
 const storage = multer.memoryStorage();
@@ -54,6 +54,7 @@ const uploadFile = [
                     next();
                 }
             } catch (err) {
+                console.log(err);
                 res.status(500).json({
                     error: "Error uploading image to Cloudinary",
                 });

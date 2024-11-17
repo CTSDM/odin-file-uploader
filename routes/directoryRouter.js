@@ -7,5 +7,6 @@ const router = Router();
 router.get("/", directoryControllers.getHomepage);
 router.post("/newDir", directoryControllers.createDir);
 router.get("/:id", directoryControllers.getDirectory);
+router.get("/delete/:id", directoryControllers.deleteDirectory);
 
 export default router;

@@ -178,6 +178,7 @@ async function deleteFile(fileId, userId) {
     return file;
 }
 
+// this function also deletes all the files within the directory
 async function deleteDirectory(userId, directoryId) {
     const directory = await prisma.directory.delete({
         where: {
@@ -185,7 +186,19 @@ async function deleteDirectory(userId, directoryId) {
             userId: userId,
         },
     });
+
     return directory;
+}
+
+async function deleteFilesFromDirectory(userId, directoryId) {
+    const files = await prisma.file.deleteMany({
+        where: {
+            userId: userId,
+            directoryId: directoryId,
+        },
+    });
+
+    return files;
 }
 
 export default {
@@ -201,4 +214,5 @@ export default {
     updateFileDownloads,
     deleteFile,
     deleteDirectory,
+    deleteFilesFromDirectory,
 };
