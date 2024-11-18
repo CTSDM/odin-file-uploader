@@ -6,5 +6,6 @@ const router = Router();
 router.post("/upload", fileControllers.uploadFile);
 router.get("/download/:id", fileControllers.downloadFile);
 router.get("/delete/:id", fileControllers.deleteFile);
+router.post("/update/:id", fileControllers.updateFile);
 
 export default router;

@@ -34,6 +34,19 @@ const uploadFile = [
         else res.redirect("/");
     },
     upload.single("file"),
+    // we check if we there is a file overwrite
+    async function (req, res, next) {
+        if (+req.body.overwrite === 1) {
+            req.params.id = req.body.fileId;
+            await deleteFileCloudDB(req, res, next);
+        } else {
+            next();
+        }
+    },
+    // here we check if a file with same name has been uploaded
+    // so we need to pull all the files from the databsae
+    // we only check if overwritten is set to false
+    checkRepetitionFile,
     // cloudinary upload
     async (req, res, next) => {
         if (req.file) {
@@ -49,8 +62,8 @@ const uploadFile = [
                         folder: env.uploadPath + "/" + userId + "/" + dirId,
                         resource_type: "auto",
                     });
-                    res.urlUploaded = result.secure_url;
-                    res.publicID = result.public_id;
+                    res.locals.urlUploaded = result.secure_url;
+                    res.locals.publicID = result.public_id;
                     next();
                 }
             } catch (err) {
@@ -84,14 +97,45 @@ async function writeToDB(req, res, next) {
             req.body.directoryId,
             fileInfo.name,
             fileInfo.extension,
-            res.urlUploaded,
-            res.publicID,
+            res.locals.urlUploaded,
+            res.locals.publicID,
         );
         next();
     } else {
         res.status(400).send(
             "Something went wrong, and the file could not be uploaded",
         );
+    }
+}
+
+// this function will only be called if overwrite is false
+// this function is more like a checking function really
+async function checkRepetitionFile(req, res, next) {
+    if (+req.body.overwrite === 1) next();
+    else {
+        const fileInfo = getFileNameExtension(req.file.originalname);
+        const filesDirectory = await db.getFilesByDirectoryId(
+            req.body.directoryId,
+            +req.user.id,
+        );
+
+        let repeated = false;
+
+        for (const file of filesDirectory) {
+            if (
+                file.name === fileInfo.name &&
+                file.extension === fileInfo.extension &&
+                file.directoryId === req.body.directoryId
+            ) {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) {
+            res.send(
+                "something went wrong, sending you to your home directory. Sorry!",
+            );
+        } else next();
     }
 }
 
@@ -143,19 +187,39 @@ function getFileNameExtension(originalName) {
     };
 }
 
-async function deleteFile(req, res) {
+const deleteFile = [
+    (_, res, next) => {
+        if (res.locals.user) next();
+        else res.redirect("/");
+    },
+    deleteFileCloudDB,
+    (req, res) => {
+        res.redirect(req.get("Referrer"));
+    },
+];
+
+async function deleteFileCloudDB(req, _, next) {
+    const fileId = req.params.id;
+    const userId = +req.user.id;
+    const file = await db.getFile(fileId, userId);
+    if (await deleteFileFromCloud(file.publicId, file.extension))
+        await db.deleteFile(fileId, userId);
+    else {
+        throw new Error("The file could not be deleted from the cloud");
+    }
+    next();
+}
+
+async function updateFile(req, res) {
     if (res.locals.user) {
         const fileId = req.params.id;
         const userId = +req.user.id;
-        const file = await db.getFile(fileId, userId);
-        if (await deleteFileFromCloud(file.publicId, file.extension))
-            await db.deleteFile(fileId, userId);
-        else console.log("The file could not be deleted from the cloud");
-
+        const newName = req.body.name;
+        const file = await db.updateFile(userId, fileId, newName);
         res.redirect(req.get("Referrer"));
     } else {
         res.redirect("/");
     }
 }
 
-export default { uploadFile, downloadFile, deleteFile };
+export default { uploadFile, downloadFile, deleteFile, updateFile };

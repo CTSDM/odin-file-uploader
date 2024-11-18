@@ -96,16 +96,21 @@ async function addFile(
     assert.strictEqual(typeof urlPath === "string", true);
     assert.strictEqual(typeof extension === "string", true);
     assert.strictEqual(typeof publicID === "string", true);
-    const file = await prisma.file.create({
-        data: {
-            userId: userId,
-            directoryId: directoryId,
-            name: name,
-            extension: extension,
-            urlStorage: urlPath,
-            publicId: publicID,
-        },
-    });
+    let file = null;
+    try {
+        file = await prisma.file.create({
+            data: {
+                userId: userId,
+                directoryId: directoryId,
+                name: name,
+                extension: extension,
+                urlStorage: urlPath,
+                publicId: publicID,
+            },
+        });
+    } catch (err) {
+        console.log(err);
+    }
     return file;
 }
 
@@ -129,6 +134,7 @@ async function getFilesByDirectoryId(directoryId, userId) {
             id: true,
             downloads: true,
             publicId: true,
+            directoryId: true,
         },
     });
     return files;
@@ -201,6 +207,20 @@ async function deleteFilesFromDirectory(userId, directoryId) {
     return files;
 }
 
+async function updateFile(userId, fileId, newName) {
+    const file = await prisma.file.update({
+        where: {
+            userId: userId,
+            id: fileId,
+        },
+        data: {
+            name: newName,
+        },
+    });
+
+    return file;
+}
+
 export default {
     createUser,
     getUser,
@@ -215,4 +235,5 @@ export default {
     deleteFile,
     deleteDirectory,
     deleteFilesFromDirectory,
+    updateFile,
 };

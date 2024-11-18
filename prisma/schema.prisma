@@ -35,6 +35,7 @@ model File {
     downloads   Int       @default(0)
     userId      Int
 
+    @@unique([name, extension, directoryId])
     @@map("files")
 }
 
