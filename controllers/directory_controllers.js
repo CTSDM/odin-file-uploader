@@ -2,32 +2,28 @@ import { env } from "../config/config.js";
 import db from "../db/queries.js";
 import { deleteDirFromCloud } from "../helpers/helpers.js";
 
-async function getHomepage(req, res) {
+const getHomepage = [
     // Check if the user is logged in
-    if (res.locals.user) {
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    async (req, res) => {
         if (req.originalUrl === "/directory") res.redirect("/home");
         else {
             const userId = +req.user.id;
             const rootDir = await db.getRootDirectory(userId);
             await renderDirectoryPage(rootDir, userId, req, res);
         }
-    } else res.redirect("/");
-}
+    },
+];
 
-async function createDir(req, res) {
-    const parentId = req.body.parentId;
-    const dirName = req.body.directory;
-    const userId = req.user.id;
-    await db.createNewDirectory(userId, dirName, parentId);
-
-    // we redirect if we are in the root directory
-    if (parentId === null) res.redirect("/home");
-    else res.redirect(`/directory/${parentId}`);
-}
-
-async function getDirectory(req, res) {
-    // check if the user is logged in
-    if (res.locals.user) {
+const getDirectory = [
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    async (req, res) => {
         // check if the user has access to the requested directory
         const directoryId = req.params.id;
         const userId = +req.user.id;
@@ -36,27 +32,39 @@ async function getDirectory(req, res) {
             console.log("user cannot access the requested folder");
             res.redirect("/home");
         } else {
-            await renderDirectoryPage(directory, userId, req, res);
+            if (directory.parentId === null) res.redirect("/home");
+            else await renderDirectoryPage(directory, userId, req, res);
         }
-    } else res.redirect("/");
-}
+    },
+];
 
-async function renderDirectoryPage(directory, userId, req, res) {
-    const directoryInfo = getDirectoryInfo(directory);
-    const files = await db.getFilesByDirectoryId(directory.id, userId);
-    directoryInfo.files = files;
-    res.locals.currentDirectory = directoryInfo;
-    req.session.currentDirectory = directoryInfo;
-    res.render("../views/pages/home.ejs", {
-        env: env,
-    });
-}
+const createDir = [
+    // Check if the user is logged in
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    async (req, res) => {
+        const parentId = req.body.parentId;
+        const dirName = req.body.directory;
+        const userId = req.user.id;
+        await db.createNewDirectory(userId, dirName, parentId);
+
+        // we redirect if we are in the root directory
+        if (parentId === null) res.redirect("/home");
+        else res.redirect(`/directory/${parentId}`);
+    },
+];
 
 // deleting a directory implies deleting all the files and directories inside the directory
 // so we retrieve all the directories and its associates files
 // then we iterate and delete everything
-async function deleteDirectory(req, res) {
-    if (res.locals.user) {
+const deleteDirectory = [
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    async (req, res) => {
         const directoryId = req.params.id;
         const userId = +req.user.id;
 
@@ -71,7 +79,18 @@ async function deleteDirectory(req, res) {
             await db.deleteDirectory(userId, dirId[index]);
         }
         res.redirect(req.get("Referrer"));
-    } else res.redirect("/");
+    },
+];
+
+async function renderDirectoryPage(directory, userId, req, res) {
+    const directoryInfo = getDirectoryInfo(directory);
+    const files = await db.getFilesByDirectoryId(directory.id, userId);
+    directoryInfo.files = files;
+    res.locals.currentDirectory = directoryInfo;
+    req.session.currentDirectory = directoryInfo;
+    res.render("../views/pages/home.ejs", {
+        env: env,
+    });
 }
 
 async function getDirsFilesIds(dir, userId, dirsList = [], fileList = []) {
