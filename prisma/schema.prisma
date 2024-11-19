@@ -29,6 +29,7 @@ model File {
     urlStorage  String
     publicId    String
     createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+    modifiedAt  DateTime  @default(now()) @db.Timestamptz(3)
     User        User?     @relation(fields: [userId], references: [id])
     Directory   Directory @relation(fields: [directoryId], references: [id])
     directoryId String    @db.Uuid

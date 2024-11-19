@@ -57,6 +57,18 @@ const deleteFile = [
     },
 ];
 
+async function viewFileInfo(req, res) {
+    const file = await db.getFile(req.params.id, +req.user.id);
+    res.locals.fileInfo = {
+        id: req.params.id,
+        nameExtension: file.name + "." + file.extension,
+        created: file.createdAt,
+        modified: file.modifiedAt,
+        downloads: file.downloads,
+    };
+    res.render("../views/pages/file.ejs");
+}
+
 async function checkfileInMemory(req, res, next) {
     if (req.file) next();
     else res.redirect("/");
@@ -174,4 +186,10 @@ async function deleteFileCloudDB(req, _, next) {
     next();
 }
 
-export default { uploadFile, downloadFile, deleteFile, updateFileName };
+export default {
+    uploadFile,
+    downloadFile,
+    deleteFile,
+    updateFileName,
+    viewFileInfo,
+};

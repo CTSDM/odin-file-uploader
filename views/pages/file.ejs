@@ -1,0 +1,25 @@
+<%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
+
+<body>
+    <div>Hi <%= locals.user.username %></div>
+    <div>Information about the file:</div>
+    <div>Name: <%= locals.fileInfo.nameExtension %></div>
+    <div>Downloads: <%= locals.fileInfo.downloads %></div>
+    <div id="created"></div>
+    <div id="modified"></div>
+    <a href="/file/download/<%= locals.fileInfo.id %>">Download</a>
+</body>
+<script defer>
+    const dateCreated = "<%= locals.fileInfo.created %>";
+    const dateModified = "<%= locals.fileInfo.modified %>";
+    const dateCreatedLocaleString = new Date(dateCreated).toLocaleString();
+    const dateModifiedLocaleString = new Date(dateModified).toLocaleString();
+
+    const divCreated = document.querySelector("#created");
+    const divModified = document.querySelector("#modified");
+
+    divCreated.innerText = "Created: " + dateCreatedLocaleString;
+    divModified.innerText = "Modified: " + dateCreatedLocaleString;
+</script>
+
+<%- include('../partials/_footer.ejs') %>

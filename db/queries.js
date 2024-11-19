@@ -154,6 +154,9 @@ async function getFile(fileId, userId) {
             publicId: true,
             extension: true,
             urlStorage: true,
+            createdAt: true,
+            modifiedAt: true,
+            downloads: true,
         },
     });
     return file;
@@ -215,6 +218,7 @@ async function updateFile(userId, fileId, newName) {
         },
         data: {
             name: newName,
+            modifiedAt: new Date(),
         },
     });
 
