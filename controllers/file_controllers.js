@@ -1,31 +1,9 @@
 import { env, fileAllowedInfo, fileStatusUpload } from "../config/config.js";
-import multer from "multer";
 import db from "../db/queries.js";
 import https from "https";
 import cloudinary from "../config/database.js";
 import { deleteFileFromCloud } from "../helpers/helpers.js";
-
-// Initialize multer with RAM as storage
-const storage = multer.memoryStorage();
-// At this point with multer we don't know the size of the file
-// but we know its mimetype, so if the type file is not allowed we refuse the upload
-// thus potentially saving some RAM usage and bandwidth
-const fileFilter = (_, file, cb) => {
-    if (fileAllowedInfo[file.mimetype]) {
-        cb(null, true);
-    } else {
-        // cb(null, false) makes that the req.file after upload.single is undefined
-        cb(null, false);
-    }
-};
-// upload
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 1 * 1024 * 1024 * 10, // 10 MB maximum size for any given file
-    },
-    fileFilter: fileFilter,
-});
+import upload from "../config/storage.js";
 
 const uploadFile = [
     // Check if the user is logged in
@@ -34,112 +12,18 @@ const uploadFile = [
         else res.redirect("/");
     },
     upload.single("file"),
-    // we check if we there is a file overwrite
-    async function (req, res, next) {
-        if (+req.body.overwrite === 1) {
-            req.params.id = req.body.fileId;
-            await deleteFileCloudDB(req, res, next);
-        } else {
-            next();
-        }
-    },
-    // here we check if a file with same name has been uploaded
-    // so we need to pull all the files from the databsae
-    // we only check if overwritten is set to false
+    checkfileInMemory,
+    deleteIfOverwrite,
     checkRepetitionFile,
-    // cloudinary upload
-    async (req, res, next) => {
-        if (req.file) {
-            try {
-                const b64 = Buffer.from(req.file.buffer).toString("base64");
-                let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-                if (req.file.size > fileAllowedInfo[req.file.mimetype])
-                    renderUpload(req, res, 1);
-                else {
-                    const userId = req.user.id;
-                    const dirId = req.body.directoryId;
-                    const result = await cloudinary.uploader.upload(dataURI, {
-                        folder: env.uploadPath + "/" + userId + "/" + dirId,
-                        resource_type: "auto",
-                    });
-                    res.locals.urlUploaded = result.secure_url;
-                    res.locals.publicID = result.public_id;
-                    next();
-                }
-            } catch (err) {
-                console.log(err);
-                res.status(500).json({
-                    error: "Error uploading image to Cloudinary",
-                });
-            }
-        } else {
-            renderUpload(req, res, 2);
-        }
-    },
+    cloudinaryUpload,
     writeToDB,
-    async function (req, res) {
-        // we need to know whether the directory is root or not for the redirect path
-        const directory = await db.getDirectoryByID(
-            +req.user.id,
-            req.body.directoryId,
-        );
-        if (directory.parentId)
-            res.redirect(`/directory/${req.body.directoryId}`);
-        else res.redirect("/home");
+    (req, res) => {
+        res.redirect(req.get("Referrer"));
     },
 ];
 
-async function writeToDB(req, res, next) {
-    const fileInfo = getFileNameExtension(req.file.originalname);
-    if (req.file) {
-        await db.addFile(
-            +req.user.id,
-            req.body.directoryId,
-            fileInfo.name,
-            fileInfo.extension,
-            res.locals.urlUploaded,
-            res.locals.publicID,
-        );
-        next();
-    } else {
-        res.status(400).send(
-            "Something went wrong, and the file could not be uploaded",
-        );
-    }
-}
-
-// this function will only be called if overwrite is false
-// this function is more like a checking function really
-async function checkRepetitionFile(req, res, next) {
-    if (+req.body.overwrite === 1) next();
-    else {
-        const fileInfo = getFileNameExtension(req.file.originalname);
-        const filesDirectory = await db.getFilesByDirectoryId(
-            req.body.directoryId,
-            +req.user.id,
-        );
-
-        let repeated = false;
-
-        for (const file of filesDirectory) {
-            if (
-                file.name === fileInfo.name &&
-                file.extension === fileInfo.extension &&
-                file.directoryId === req.body.directoryId
-            ) {
-                repeated = true;
-                break;
-            }
-        }
-        if (repeated) {
-            res.send(
-                "something went wrong, sending you to your home directory. Sorry!",
-            );
-        } else next();
-    }
-}
-
 const downloadFile = [
+    // Check if the user is logged in
     function (req, res, next) {
         if (req.user) next();
         else res.redirect("/");
@@ -170,6 +54,121 @@ const downloadFile = [
     },
 ];
 
+const updateFileName = [
+    // check if the user is logged in
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    async function updateFile(req, res) {
+        const fileId = req.params.id;
+        const userId = +req.user.id;
+        const newName = req.body.name;
+        await db.updateFile(userId, fileId, newName);
+        res.redirect(req.get("Referrer"));
+    },
+];
+
+const deleteFile = [
+    // check if the user is logged in
+    (req, res, next) => {
+        if (req.user) next();
+        else res.redirect("/");
+    },
+    deleteFileCloudDB,
+    (req, res) => {
+        res.redirect(req.get("Referrer"));
+    },
+];
+
+async function checkfileInMemory(req, res, next) {
+    if (req.user) next();
+    else res.redirect("/");
+}
+
+async function deleteIfOverwrite(req, res, next) {
+    if (+req.body.overwrite === 1) {
+        req.params.id = req.body.fileId;
+        await deleteFileCloudDB(req, res, next);
+    } else {
+        next();
+    }
+}
+
+async function cloudinaryUpload(req, res, next) {
+    try {
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+        if (req.file.size > fileAllowedInfo[req.file.mimetype])
+            renderUpload(req, res, 1);
+        else {
+            const userId = req.user.id;
+            const dirId = req.body.directoryId;
+            const result = await cloudinary.uploader.upload(dataURI, {
+                folder: env.uploadPath + "/" + userId + "/" + dirId,
+                resource_type: "auto",
+            });
+            res.locals.urlUploaded = result.secure_url;
+            res.locals.publicID = result.public_id;
+            next();
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({
+            error: "Error uploading image to Cloudinary",
+        });
+    }
+}
+
+async function writeToDB(req, res, next) {
+    const fileInfo = getFileNameExtension(req.file.originalname);
+    if (req.file) {
+        await db.addFile(
+            +req.user.id,
+            req.body.directoryId,
+            fileInfo.name,
+            fileInfo.extension,
+            res.locals.urlUploaded,
+            res.locals.publicID,
+        );
+        next();
+    } else {
+        res.status(400).send(
+            "Something went wrong, and the file could not be uploaded",
+        );
+    }
+}
+
+// This function checks if there is a collision when the user didn't set overwrite to 1
+async function checkRepetitionFile(req, res, next) {
+    if (+req.body.overwrite === 1) next();
+    else {
+        const fileInfo = getFileNameExtension(req.file.originalname);
+        const filesDirectory = await db.getFilesByDirectoryId(
+            req.body.directoryId,
+            +req.user.id,
+        );
+
+        let repeated = false;
+
+        for (const file of filesDirectory) {
+            if (
+                file.name === fileInfo.name &&
+                file.extension === fileInfo.extension &&
+                file.directoryId === req.body.directoryId
+            ) {
+                repeated = true;
+                break;
+            }
+        }
+        if (repeated) {
+            res.send(
+                "something went wrong, sending you to your home directory. Sorry!",
+            );
+        } else next();
+    }
+}
+
 function renderUpload(req, res, fileCode) {
     const msg = fileCode === 1 ? fileStatusUpload[1] : fileStatusUpload[2];
     res.render("../views/pages/home.ejs", {
@@ -187,17 +186,6 @@ function getFileNameExtension(originalName) {
     };
 }
 
-const deleteFile = [
-    (_, res, next) => {
-        if (res.locals.user) next();
-        else res.redirect("/");
-    },
-    deleteFileCloudDB,
-    (req, res) => {
-        res.redirect(req.get("Referrer"));
-    },
-];
-
 async function deleteFileCloudDB(req, _, next) {
     const fileId = req.params.id;
     const userId = +req.user.id;
@@ -210,16 +198,4 @@ async function deleteFileCloudDB(req, _, next) {
     next();
 }
 
-async function updateFile(req, res) {
-    if (res.locals.user) {
-        const fileId = req.params.id;
-        const userId = +req.user.id;
-        const newName = req.body.name;
-        const file = await db.updateFile(userId, fileId, newName);
-        res.redirect(req.get("Referrer"));
-    } else {
-        res.redirect("/");
-    }
-}
-
-export default { uploadFile, downloadFile, deleteFile, updateFile };
+export default { uploadFile, downloadFile, deleteFile, updateFileName };
