@@ -4,6 +4,7 @@ import passport from "passport";
 import path from "node:path";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
+import { checkUserLoggedIn } from "./middleware/checkUserLoggedIn.js";
 
 const app = express();
 
@@ -55,15 +56,16 @@ app.use((req, res, next) => {
 app.use("/", defaultRouter);
 app.use("/sign-up", signupRouter);
 app.use("/login", loginRouter);
-app.use("/home", homeRouter);
-app.use("/directory", directoryRouter);
-app.use("/file", fileRouter);
 app.get("/logout", (req, res, next) => {
     req.logout((err) => {
         if (err) return next(err);
         res.redirect("/");
     });
 });
+// we add a middleware function to check if the user is logged in
+app.use("/home", checkUserLoggedIn, homeRouter);
+app.use("/directory", checkUserLoggedIn, directoryRouter);
+app.use("/file", checkUserLoggedIn, fileRouter);
 
 // opening port
 app.listen(PORT, () => console.log(`Server is up on the port ${PORT}`));

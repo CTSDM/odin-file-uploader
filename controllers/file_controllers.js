@@ -6,11 +6,6 @@ import { deleteFileFromCloud } from "../helpers/helpers.js";
 import upload from "../config/storage.js";
 
 const uploadFile = [
-    // Check if the user is logged in
-    function (req, res, next) {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     upload.single("file"),
     checkfileInMemory,
     deleteIfOverwrite,
@@ -22,59 +17,40 @@ const uploadFile = [
     },
 ];
 
-const downloadFile = [
-    // Check if the user is logged in
-    function (req, res, next) {
-        if (req.user) next();
-        else res.redirect("/");
-    },
-    async function (req, res) {
-        // we check if the file exists and/or if the user has access to it
-        // in any of those cases we don't do anything
-        const userId = +req.user.id;
-        const fileId = req.params.id;
-        const fileDB = await db.getFile(fileId, userId);
-        if (fileDB) {
-            https.get(fileDB.urlStorage, function (file) {
-                res.set(
-                    "Content-disposition",
-                    "attachment; filename=" +
-                        encodeURI(fileDB.name + "." + fileDB.extension),
-                );
-                res.set("Content-Type", file.headers["content-type"]);
-                file.pipe(res);
-            });
-            db.updateFileDownloads(fileId);
-        } else {
-            console.error(
-                "There was an error trying to retrieve the file the user requested",
+async function downloadFile(req, res) {
+    // we check if the file exists and/or if the user has access to it
+    // in any of those cases we don't do anything
+    const userId = +req.user.id;
+    const fileId = req.params.id;
+    const fileDB = await db.getFile(fileId, userId);
+    if (fileDB) {
+        https.get(fileDB.urlStorage, function (file) {
+            res.set(
+                "Content-disposition",
+                "attachment; filename=" +
+                    encodeURI(fileDB.name + "." + fileDB.extension),
             );
-            res.status(500).send("Error downloading the file.");
-        }
-    },
-];
+            res.set("Content-Type", file.headers["content-type"]);
+            file.pipe(res);
+        });
+        db.updateFileDownloads(fileId);
+    } else {
+        console.error(
+            "There was an error trying to retrieve the file the user requested",
+        );
+        res.status(500).send("Error downloading the file.");
+    }
+}
 
-const updateFileName = [
-    // check if the user is logged in
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
-    async function updateFile(req, res) {
-        const fileId = req.params.id;
-        const userId = +req.user.id;
-        const newName = req.body.name;
-        await db.updateFile(userId, fileId, newName);
-        res.redirect(req.get("Referrer"));
-    },
-];
+async function updateFileName(req, res) {
+    const fileId = req.params.id;
+    const userId = +req.user.id;
+    const newName = req.body.name;
+    await db.updateFile(userId, fileId, newName);
+    res.redirect(req.get("Referrer"));
+}
 
 const deleteFile = [
-    // check if the user is logged in
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     deleteFileCloudDB,
     (req, res) => {
         res.redirect(req.get("Referrer"));
@@ -82,7 +58,7 @@ const deleteFile = [
 ];
 
 async function checkfileInMemory(req, res, next) {
-    if (req.user) next();
+    if (req.file) next();
     else res.redirect("/");
 }
 

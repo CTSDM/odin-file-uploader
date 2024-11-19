@@ -3,11 +3,6 @@ import db from "../db/queries.js";
 import { deleteDirFromCloud } from "../helpers/helpers.js";
 
 const getHomepage = [
-    // Check if the user is logged in
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     async (req, res) => {
         if (req.originalUrl === "/directory") res.redirect("/home");
         else {
@@ -19,10 +14,6 @@ const getHomepage = [
 ];
 
 const getDirectory = [
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     async (req, res) => {
         // check if the user has access to the requested directory
         const directoryId = req.params.id;
@@ -39,11 +30,6 @@ const getDirectory = [
 ];
 
 const createDir = [
-    // Check if the user is logged in
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     async (req, res) => {
         const parentId = req.body.parentId;
         const dirName = req.body.directory;
@@ -60,10 +46,6 @@ const createDir = [
 // so we retrieve all the directories and its associates files
 // then we iterate and delete everything
 const deleteDirectory = [
-    (req, res, next) => {
-        if (req.user) next();
-        else res.redirect("/");
-    },
     async (req, res) => {
         const directoryId = req.params.id;
         const userId = +req.user.id;
