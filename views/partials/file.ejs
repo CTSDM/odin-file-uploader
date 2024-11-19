@@ -1,0 +1,67 @@
+<% if (locals.fileMsgUpload) { %>
+<div>Error uploading the file: <%= locals.fileMsgUpload %></div>
+<% } %> <% if (locals.currentDirectory.files.length> 0) { %>
+<div class="files-wrapper">
+    Click to download a file: <% locals.currentDirectory.files.forEach((file)=>
+    { %>
+    <div class="file">
+        <div class="file-link-download">
+            <a class="file-download-link" href="/file/download/<%= file.id %>">
+                <%= file.name + '.' + file.extension %>
+            </a>
+        </div>
+        <div class="modification">
+            <div class="number-downloads">
+                <span
+                    >Number of downloads:
+                    <span class="counter-downloads">
+                        <%= file.downloads %>
+                    </span></span
+                >
+                <span> <a href="/file/delete/<%= file.id %>/">Delete</a></span>
+                <button class="rename-file" id="<%= file.id %>">Rename</button>
+            </div>
+        </div>
+    </div>
+    <% }) %> <% } %>
+    <div class="upload-file">
+        <form
+            action="/home"
+            method="post"
+            enctype="multipart/form-data"
+            class="upload-file"
+        >
+            <input type="file" name="file" class="upload-file" required />
+            <button type="submit">Submit the file</button>
+            <input
+                type="hidden"
+                name="directoryId"
+                value="<%= locals.currentDirectory.id %>"
+            />
+            <input
+                type="hidden"
+                name="directoryName"
+                value="<%= locals.currentDirectory.name %>"
+            />
+        </form>
+    </div>
+</div>
+
+<dialog id="dialog">
+    <div class="modal">
+        <form method="post" action="/" id="form-update-file">
+            <span>Update name of the file</span>
+            <div>
+                <label for="name">name</label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    required
+                    autocomplete="off"
+                    autofocus
+                />
+            </div>
+        </form>
+    </div>
+</dialog>
