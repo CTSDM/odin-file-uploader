@@ -11,10 +11,10 @@ async function deleteFileFromCloud(publicId, fileExtension) {
         if (response.result === "ok") {
             return true;
         } else {
-            return false;
+            return response;
         }
     } catch (err) {
-        console.log(err);
+        return err;
     }
 }
 
@@ -81,4 +81,31 @@ function categorizeFiles(publicIdList, extensionList) {
     return orderedListPublicIds;
 }
 
-export { deleteFileFromCloud, deleteDirFromCloud };
+function getRouteFromUrl(url) {
+    const route_temp = url.slice(1);
+    const route = route_temp.slice(0, route_temp.indexOf("/"));
+    return route;
+}
+
+function checkErr(req, validationResult) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return true;
+    return false;
+}
+
+function displayError(req, res, err, type) {
+    console.log(`${type} error.`);
+    console.log(err);
+    res.locals.msg = "Something went wrong, please try again.";
+    const referrerUrl = req.get("Referrer");
+    if (referrerUrl) res.locals.referrer = referrerUrl;
+    res.status(500).render("../views/pages/error.ejs");
+}
+
+export {
+    deleteFileFromCloud,
+    deleteDirFromCloud,
+    checkErr,
+    getRouteFromUrl,
+    displayError,
+};

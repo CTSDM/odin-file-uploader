@@ -1,6 +1,7 @@
 import { env } from "../config/config.js";
 import db from "../db/queries.js";
 import { deleteDirFromCloud } from "../helpers/helpers.js";
+import validation from "../middleware/validation.js";
 
 const getHomepage = [
     async (req, res) => {
@@ -30,6 +31,7 @@ const getDirectory = [
 ];
 
 const createDir = [
+    validation.createDirectory,
     async (req, res) => {
         const parentId = req.body.parentId;
         const dirName = req.body.directory;

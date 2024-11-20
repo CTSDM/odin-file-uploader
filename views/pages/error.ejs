@@ -1,0 +1,14 @@
+<%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
+
+<body>
+    <div>Hi <%= locals.user.username %></div>
+    <% if (locals.msg) { %>
+    <div><%= locals.msg %></div>
+    <% } %> <% if (locals.referrer) { %>
+    <div>
+        <a href="<%= locals.referrer %>">Go back!</a>
+    </div>
+    <% } %>
+</body>
+
+<%- include('../partials/_footer.ejs') %>

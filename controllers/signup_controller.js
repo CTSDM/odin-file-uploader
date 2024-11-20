@@ -9,7 +9,7 @@ async function getCreateUser(_, res) {
 }
 
 const postCreateUser = [
-    validation.validateNewUser,
+    validation.newUser,
     async function (req, res) {
         const errors = validation.validationResult(req);
         res.locals.messageError = {};

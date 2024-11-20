@@ -44,6 +44,7 @@ app.use(
 app.use(passport.session());
 app.use(express.static(assetsPath));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.set("view engine", "ejs");
 
 // We add the user data so it is accessible on all the views
@@ -66,6 +67,8 @@ app.get("/logout", (req, res, next) => {
 app.use("/home", checkUserLoggedIn, homeRouter);
 app.use("/directory", checkUserLoggedIn, directoryRouter);
 app.use("/file", checkUserLoggedIn, fileRouter);
+// this catches all the not handled routes
+app.use((_, res) => res.redirect("/home"));
 
 // opening port
 app.listen(PORT, () => console.log(`Server is up on the port ${PORT}`));

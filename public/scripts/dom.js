@@ -1,4 +1,6 @@
 // uploading count
+import { updateFilename as getDataUpdateFilename } from "./requests.js";
+
 const downloadButtons = document.querySelectorAll(".file-download-link");
 const downloadHitsArr = document.querySelectorAll(".counter-downloads");
 downloadButtons.forEach((button, index) => {
@@ -13,14 +15,48 @@ const buttonsUpdateFiles = document.querySelectorAll(".rename-file");
 const dialog = document.querySelector("dialog");
 const pathActionUpdate = "file/update/";
 
-buttonsUpdateFiles.forEach((button) => {
-    button.addEventListener("click", (e) => {
+buttonsUpdateFiles.forEach((button, index) => {
+    button.addEventListener("click", (eventButton) => {
         dialog.showModal();
-        const formUpdateFile = document.querySelector("#form-update-file");
-        fileId = e.target.id;
-        formUpdateFile.setAttribute("action", pathActionUpdate + fileId);
+        const inputName = document.querySelector("#name");
+        inputName.value = getCurrentName(index);
+        const form = document.querySelector("form.update");
+        form.addEventListener("submit", async (formEvent) => {
+            formEvent.preventDefault();
+            const fileId = eventButton.target.id;
+            const pathAction = pathActionUpdate + fileId;
+            const response = await getDataUpdateFilename(
+                pathAction,
+                inputName.value,
+            );
+            if (renderUpdateFilename(response, index)) inputName.value = "";
+            dialog.close();
+        });
     });
 });
+
+function getCurrentName(index) {
+    const spanName = document.querySelector(`.num-${index}`);
+    return spanName.innerText;
+}
+
+function renderUpdateFilename(response, index) {
+    if (+response.status === 200) {
+        const spanName = document.querySelector(`.num-${index}`);
+        spanName.innerText = response.msg;
+        return true;
+    } else {
+        const divFile = document.querySelector(".files-wrapper");
+        if (document.querySelector("file-error"))
+            divFile.removeChild(document.querySelector("file-error"));
+        const divErr = document.createElement("div");
+        divErr.classList.add("file-error");
+        divErr.innerText =
+            "The name length should be between 1 and 100 characters.";
+        divFile.appendChild(divErr);
+        return false;
+    }
+}
 
 dialog.addEventListener("click", (e) => {
     if (e.target === dialog) {
