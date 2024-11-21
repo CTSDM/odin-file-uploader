@@ -1,6 +1,9 @@
 // uploading count
 import { updateFilename as getDataUpdateFilename } from "./requests.js";
 
+// elements containing the id of the file to be downloaded
+const anchorFileDownload = document.querySelectorAll("a.file-download-link");
+
 const downloadButtons = document.querySelectorAll(".file-download-link");
 const downloadHitsArr = document.querySelectorAll(".counter-downloads");
 downloadButtons.forEach((button, index) => {
@@ -72,9 +75,8 @@ const formUpload = document.querySelector("form.upload-file");
 
 formUpload.addEventListener("submit", (e) => {
     e.preventDefault();
-    const files = document.querySelectorAll("a.file-download-link");
     const submit = true;
-    for (const file of files) {
+    for (const file of anchorFileDownload) {
         const fileId = file.href.slice(file.href.lastIndexOf("/") + 1);
         if (file.innerText === inputUploadFile.files[0].name) {
             if (getConfirmationOverwrite()) {
