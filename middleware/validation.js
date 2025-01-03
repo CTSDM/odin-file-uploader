@@ -1,4 +1,4 @@
-import { body, query, param } from "express-validator";
+import { body, query, param, validationResult } from "express-validator";
 import { getRouteFromUrl as getRoute } from "../helpers/helpers.js";
 
 const errorMessages = {
@@ -49,6 +49,7 @@ const validation = {
     updateFile,
     downloadFile,
     createDirectory,
+    validationResult,
 };
 
 function redirectErr(req, res) {
