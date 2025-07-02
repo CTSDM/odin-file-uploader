@@ -18,6 +18,7 @@ const env = {
         api_secret: process.env.API_SECRET_CLOUDINARY,
     },
     port: process.env.PORT,
+    url: process.env.URL ? "" : process.env.URL,
 };
 
 const fileAllowedInfo = {

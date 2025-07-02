@@ -1,5 +1,7 @@
+import { env } from "../../config/config.js";
+
 const updateFilename = async function (action, name) {
-    const response = await fetch(action, {
+    const response = await fetch(env.url + action, {
         method: "POST",
         body: JSON.stringify({ name: name }),
         headers: {

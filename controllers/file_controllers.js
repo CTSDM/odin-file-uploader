@@ -66,6 +66,7 @@ const updateFileName = [
     // 1.- if the data is just not correct to what it should be then we print on the client-side the requirements
     // 2.- if some data has been manipulated we just show an error page saying that the access to the file is not possible
     async (req, res) => {
+        console.log("here");
         const fileId = req.params.id;
         const userId = +req.user.id;
         const newName = req.body.name;
