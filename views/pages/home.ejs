@@ -1,12 +1,15 @@
 <%- include('../partials/_head.ejs') %> <%- include('../partials/header.ejs') %>
 
-<body>
-    <div>Hi <%= locals.user.username %></div>
-    <%- include('../partials/directory.ejs') %> <%-
-    include('../partials/file.ejs') %> <% if (locals.cloudError) { %>
-    <div><%= locals.cloudError %></div>
-    <% } %>
-    <script src="scripts/script.js" type="module" defer></script>
-</body>
+        <body>
+            <div>Welcome back, <%= locals.user.username %>
+            </div>
+            <%- include('../partials/directory.ejs') %> <%- include('../partials/file.ejs') %>
+                    <% if (locals.cloudError) { %>
+                        <div>
+                            <%= locals.cloudError %>
+                        </div>
+                        <% } %>
+                            <script src="scripts/script.js" type="module" defer></script>
+        </body>
 
-<%- include('../partials/_footer.ejs') %>
+        <%- include('../partials/_footer.ejs') %>

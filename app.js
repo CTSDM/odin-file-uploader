@@ -5,6 +5,7 @@ import path from "node:path";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
 import { checkUserLoggedIn } from "./middleware/checkUserLoggedIn.js";
+import { env } from "./config/config.js";
 
 const app = express();
 
@@ -22,7 +23,7 @@ import { dirname } from "node:path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PORT = 5000;
+const PORT = env.port;
 const assetsPath = path.join(__dirname, "public");
 
 import "./config/passport.js";

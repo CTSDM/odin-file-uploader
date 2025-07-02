@@ -1,50 +1,45 @@
 <div>
-    <span> <%= locals.currentDirectory.name %> directory. </span>
+    <span>
+        <%= locals.currentDirectory.name %> directory.
+    </span>
 </div>
 <% if (locals.currentDirectory.children.length> 0) { %>
-<div>Children directories</div>
-<% locals.currentDirectory.children.forEach((child)=> { %>
-<div class="directory">
-    <a href="/directory/<%= child.id %>"> <%= child.name %> </a>
-    <div class="modifications">
-        <span> <a href="/directory/delete/<%= child.id %>/">Delete</a></span>
-        <span>Rename</span>
-    </div>
-</div>
-<% }) %> <% } %> <% if (locals.currentDirectory.parentId) { %>
-<div>
-    <a href="/directory/<%= locals.currentDirectory.parentId %>"
-        >Go back to parent directory</a
-    >
-</div>
-<% } else { %>
-<div>You are in the top level directory.</div>
-<% } %>
-<div class="create-folder">
-    Create a new folder under this /<%=
-    locals.currentDirectory.name%>/directory.
-    <div class="create-directory">
-        <form action="/directory/newDir" method="POST">
-            <div>
-                <label for="directory">New directory name: </label>
-                <input
-                    type="text"
-                    name="directory"
-                    id="directory"
-                    placeholder="dir name"
-                    required
-                    minlength="<%= locals.env.userForm.directoryMinLength %>"
-                    minlength="<%= locals.env.userForm.directoryMaxLength %>"
-                />
+    <div>Children directories</div>
+    <% locals.currentDirectory.children.forEach((child)=> { %>
+        <div class="directory">
+            <a href="/directory/<%= child.id %>">
+                <%= child.name %>
+            </a>
+            <div class="modifications">
+                <span> <a href="/directory/delete/<%= child.id %>/">Delete</a></span>
+                <span>Rename</span>
             </div>
-            <div>
-                <input
-                    type="hidden"
-                    name="parentId"
-                    value="<%= locals.currentDirectory.id %>"
-                />
-            </div>
-            <button id="button-submit-new-user" type="submit">Submit</button>
-        </form>
-    </div>
-</div>
+        </div>
+        <% }) %>
+            <% } %>
+                <% if (locals.currentDirectory.parentId) { %>
+                    <div>
+                        <a href="/directory/<%= locals.currentDirectory.parentId %>">Go back to parent directory</a>
+                    </div>
+                    <% } else { %>
+                        <div>You are in the top level directory.</div>
+                        <% } %>
+                            <div class="create-folder">
+                                Create a new folder under this /<%= locals.currentDirectory.name%>/directory.
+                                    <div class="create-directory">
+                                        <form action="/directory/newDir" method="POST">
+                                            <div>
+                                                <label for="directory">New directory name: </label>
+                                                <input type="text" name="directory" id="directory"
+                                                    placeholder="dir name" required
+                                                    minlength="<%= locals.env.userForm.directoryMinLength %>"
+                                                    minlength="<%= locals.env.userForm.directoryMaxLength %>" />
+                                            </div>
+                                            <div>
+                                                <input type="hidden" name="parentId"
+                                                    value="<%= locals.currentDirectory.id %>" />
+                                            </div>
+                                            <button id="button-submit-new-user" type="submit">Submit</button>
+                                        </form>
+                                    </div>
+                            </div>

@@ -27,6 +27,7 @@ const postCreateUser = [
             newUser.pw = await bcrypt.hash(req.body.password, 10);
             const userDB = await db.createUser(newUser);
             await db.createNewDirectory(userDB.id);
+            // this is made to auto athenticate!
             passport.authenticate("local")(req, res, function () {
                 res.redirect("/");
             });

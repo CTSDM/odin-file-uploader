@@ -1,11 +1,11 @@
 <header>
-    <% if (locals.user === undefined) { %>
-    <a href="/login">Already a user?</a>
-    <a href="/sign-up">Sign up!</a>
-    <% } else { if (locals.user.membership_status === false) { %>
-    <a href="/sign-up/member">Become a club member!</a>
-    <% } %>
-    <a href="/logout">Log out</a>
-    <% } %>
-    <h1>SOME PLACEHOLDER TEXT GOES IN HERE!</h1>
+    <% if (locals.user===undefined) { %>
+        <a href="/login">Already a user?</a>
+        <a href="/sign-up">Sign up!</a>
+        <% } else { if (locals.user.membership_status===false) { %>
+            <a href="/sign-up/member">Become a club member!</a>
+            <% } %>
+                <a href="/logout">Log out</a>
+                <% } %>
+                    <h1>File uploader</h1>
 </header>
